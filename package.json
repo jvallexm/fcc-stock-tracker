@@ -1,0 +1,41 @@
+{
+  "name": "fcc-stock-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --hot --history-api-fallback --open",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wkwiatek/react-hot-loader-minimal-boilerplate/issues"
+  },
+  "dependencies": {
+    "chart.js": "^1.1.1",
+    "react": "^15.4.2",
+    "react-chartjs": "^0.8.0",
+    "react-dom": "^15.4.2",
+    "twitter": "^1.7.1",
+    "express": "^4.14.1",
+    "mongodb": "^2.2.30",
+    "jquery": "^3.2.1",
+    "react-facebook-login": "^3.6.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-latest": "^6.22.0",
+    "babel-preset-react": "^6.23.0",
+    "react-hot-loader": "^3.0.0-beta.6",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1"
+  }
+}

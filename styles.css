@@ -1,0 +1,97 @@
+.options
+{
+  max-width: 500px;
+}
+.middle-text
+{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+.poll
+{
+  background-color: blue;
+  color: white;
+  border-radius: 20px;
+  padding: 10px;
+  margin: 10px;
+}
+#the-polls
+{
+  max-width: 600px
+}
+.new-poll
+{
+  background-color: blue;
+  margin-top: 60px;
+  color: white;
+  border-radius: 20px;
+  padding: 10px;
+  margin: 10px;
+  min-width: 600px;
+}
+.gray-out
+{
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  position: absolute;
+  background-color: rgba(255, 255, 255, .72);
+  min-height:100%;
+  min-width:100%;
+}
+.x-btn
+{
+  top: 10px;
+  right: 25px;
+  position: absolute;
+  border-radius: 0;
+  border-top-right-radius: 20px;
+  box-shadow: none;
+}
+input
+{
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+.row
+{
+  margin: 5px;
+}
+.col-sm-10
+{
+  margin-right: -20px;
+}
+.btn-block
+{
+  width: 75px;
+}
+.error
+{
+  font-weight: bold;
+  color: red;
+}
+.box
+{
+  min-width: 25px;
+  min-height: 25px;
+  margin: 5px;
+}
+.col-md-4
+{
+  margin-left: -100px;
+  
+}
+.margin:
+{
+  margin: 5px;
+}
+.wider
+{
+  min-width: 300px;
+}
+.col-xs-8
+{
+  min-width: 100px;
+}
