@@ -5,10 +5,10 @@ var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
 var alVanUrl = 'K9NOANBYPCG01XOM';
 var url = 'mongodb://yes:yes@ds153412.mlab.com:53412/stocks';
-var getUrlFront='https://www.alphavantage.co/query?function=EMA&symbol=';
-var getUrlBack='&interval=15min&time_period=10&series_type=close&apikey=' + 'K9NOANBYPCG01XOM'; 
+var getUrlFront='https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=';
+var getUrlBack='&interval=1min&outputsize=compac&apikey=K9NOANBYPCG01XOM'; 
 var request = require("request");
-
+//https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GE&apikey=K9NOANBYPCG01XOM
 //MSFT&interval=15min&time_period=10&series_type=close&apikey=demo
 
 app.use(express.static(__dirname));

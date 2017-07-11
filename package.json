@@ -19,14 +19,18 @@
   },
   "dependencies": {
     "chart.js": "^1.1.1",
+    "d3": "^3.5.17",
+    "express": "^4.14.1",
+    "jquery": "^3.2.1",
+    "mongodb": "^2.2.30",
+    "prop-types": "^15.5.10",
+    "rd3": "^0.8.0",
     "react": "^15.4.2",
     "react-chartjs": "^0.8.0",
     "react-dom": "^15.4.2",
-    "twitter": "^1.7.1",
-    "express": "^4.14.1",
-    "mongodb": "^2.2.30",
-    "jquery": "^3.2.1",
-    "react-facebook-login": "^3.6.2"
+    "react-facebook-login": "^3.6.2",
+    "request": "*",
+    "twitter": "^1.7.1"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
