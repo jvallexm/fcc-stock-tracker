@@ -19,9 +19,35 @@ export default class App extends React.Component
     {
       title: "",
       stocks: {stocks: ["getting data from server.."]},
-      data: []
+      data: undefined
     }
+    this.removeOne = this.removeOne.bind(this);
   }
+  removeOne(num)
+  {
+    var newStocks = [];
+    for(var i=0;i<this.state.stocks.stocks.length;i++)
+    {
+      if(i!=num)
+       newStocks.push(this.state.stocks.stocks[i]);
+    }
+    var newData = [];
+    for(var j=0;j<this.state.data.length;j++)
+    {
+      if(this.state.stocks.stocks[num]!=this.state.data[j].name)
+      { 
+        newData.push(this.state.data[j]);
+      }
+    }
+    //console.log(newData);
+    this.props.socket.emit("remove stocks",
+        {
+          stocks: newStocks,
+          remove: this.state.stocks.stocks[num] 
+        }
+    );
+    this.setState({stocks: {stocks: newStocks},data: newData});
+  }  
   componentWillMount()
   {
     var title = "";
@@ -30,11 +56,25 @@ export default class App extends React.Component
       title = data.words;
       this.setState({title: title});
     });
-    this.props.socket.emit("needs stocks",{needs: "stocks"});
+    if(this.state.data==undefined)
+      this.props.socket.emit("needs stocks",{needs: "stocks"});
     this.props.socket.on("get stocks",(data)=>{
       console.log(data);
       console.log("stock symbols get");
       this.setState({stocks: data});
+    });
+    this.props.socket.on("all new stocks",(data)=>{
+      console.log("trying to get new stock data");
+      console.log(data);
+      var toObj = data;
+      console.log(toObj);
+      var newData = [];
+      for(var i=0;i<this.state.data.length;i++)
+      {
+        if(this.state.data[i].name != data.remove)
+        newData.push(this.state.data[i]);
+      }
+      this.setState({data: newData, stocks: {stocks: data.stocks}})
     });
     this.props.socket.on("get stock data",(data)=>{
       //https://yang-wei.github.io/rd3/docs/new/charts/lineChart.html
@@ -47,14 +87,14 @@ export default class App extends React.Component
           name: toObj["Meta Data"]["2. Symbol"],
           values: []
         };
-        //console.log(dataObj.name);
-        var theKeys = Object.keys(toObj["Time Series (1min)"]);
-        //console.log("keys length: " + theKeys.length);
+        console.log(dataObj.name);
+        var theKeys = Object.keys(toObj["Weekly Time Series"]);
+        console.log("keys length: " + theKeys.length);
         //console.log(toObj["Time Series (1min)"][theKeys[0]]["1. open"]);
-        for(var j=0;j<theKeys.length;j++)
+        for(var j=0;j<100;j++)
         {
           
-          var floaty = parseFloat(toObj["Time Series (1min)"][theKeys[j]]["1. open"]);
+          var floaty = parseFloat(toObj["Weekly Time Series"][theKeys[j]]["4. close"]);
           dataObj.values.push({
             
             x: j, 
@@ -77,17 +117,20 @@ export default class App extends React.Component
       <div>
       <h1>Hot poppers</h1>
       <h1>{this.state.title}</h1>
-      
-      <li>
+      <div>
+      </div>
+      <div>
         {this.state.stocks.stocks.map((d,i)=>
-          <ul key={d}>{d}</ul>
+             <button className="btn well btn-primary"
+                     onClick={()=>this.removeOne(i)}>{d}</button>
         )}
-      </li>
-      {this.state.data==[] ? <h1>"Fetching dongles"</h1> :
+      </div>
+      {this.state.data==undefined ? "Fetching dongles" :
+      
       <LineChart
         legend={true}
         data={this.state.data}
-        width='100%'
+        width={600}
         height={400}
         viewBoxObject={{
           x: 0,
@@ -98,7 +141,7 @@ export default class App extends React.Component
         title="Line Chart"
         yAxisLabel="Altitude"
         xAxisLabel="Elapsed Time (sec)"
-        domain={{x: [100,0], y: [0,1000]}}
+        domain={{x: [100,0], y: [,1000]}}
         gridHorizontal={true}
       />}
       

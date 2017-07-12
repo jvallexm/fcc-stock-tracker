@@ -27050,12 +27050,33 @@ var App = function (_React$Component) {
     _this.state = {
       title: "",
       stocks: { stocks: ["getting data from server.."] },
-      data: []
+      data: undefined
     };
+    _this.removeOne = _this.removeOne.bind(_this);
     return _this;
   }
 
   _createClass(App, [{
+    key: 'removeOne',
+    value: function removeOne(num) {
+      var newStocks = [];
+      for (var i = 0; i < this.state.stocks.stocks.length; i++) {
+        if (i != num) newStocks.push(this.state.stocks.stocks[i]);
+      }
+      var newData = [];
+      for (var j = 0; j < this.state.data.length; j++) {
+        if (this.state.stocks.stocks[num] != this.state.data[j].name) {
+          newData.push(this.state.data[j]);
+        }
+      }
+      //console.log(newData);
+      this.props.socket.emit("remove stocks", {
+        stocks: newStocks,
+        remove: this.state.stocks.stocks[num]
+      });
+      this.setState({ stocks: { stocks: newStocks }, data: newData });
+    }
+  }, {
     key: 'componentWillMount',
     value: function componentWillMount() {
       var _this2 = this;
@@ -27066,11 +27087,22 @@ var App = function (_React$Component) {
         title = data.words;
         _this2.setState({ title: title });
       });
-      this.props.socket.emit("needs stocks", { needs: "stocks" });
+      if (this.state.data == undefined) this.props.socket.emit("needs stocks", { needs: "stocks" });
       this.props.socket.on("get stocks", function (data) {
         console.log(data);
         console.log("stock symbols get");
         _this2.setState({ stocks: data });
+      });
+      this.props.socket.on("all new stocks", function (data) {
+        console.log("trying to get new stock data");
+        console.log(data);
+        var toObj = data;
+        console.log(toObj);
+        var newData = [];
+        for (var i = 0; i < _this2.state.data.length; i++) {
+          if (_this2.state.data[i].name != data.remove) newData.push(_this2.state.data[i]);
+        }
+        _this2.setState({ data: newData, stocks: { stocks: data.stocks } });
       });
       this.props.socket.on("get stock data", function (data) {
         //https://yang-wei.github.io/rd3/docs/new/charts/lineChart.html
@@ -27082,13 +27114,13 @@ var App = function (_React$Component) {
             name: toObj["Meta Data"]["2. Symbol"],
             values: []
           };
-          //console.log(dataObj.name);
-          var theKeys = Object.keys(toObj["Time Series (1min)"]);
-          //console.log("keys length: " + theKeys.length);
+          console.log(dataObj.name);
+          var theKeys = Object.keys(toObj["Weekly Time Series"]);
+          console.log("keys length: " + theKeys.length);
           //console.log(toObj["Time Series (1min)"][theKeys[0]]["1. open"]);
-          for (var j = 0; j < theKeys.length; j++) {
+          for (var j = 0; j < 100; j++) {
 
-            var floaty = parseFloat(toObj["Time Series (1min)"][theKeys[j]]["1. open"]);
+            var floaty = parseFloat(toObj["Weekly Time Series"][theKeys[j]]["4. close"]);
             dataObj.values.push({
 
               x: j,
@@ -27107,6 +27139,8 @@ var App = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this3 = this;
+
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         'div',
         null,
@@ -27120,25 +27154,25 @@ var App = function (_React$Component) {
           null,
           this.state.title
         ),
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          'li',
+          'div',
           null,
           this.state.stocks.stocks.map(function (d, i) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-              'ul',
-              { key: d },
+              'button',
+              { className: 'btn well btn-primary',
+                onClick: function onClick() {
+                  return _this3.removeOne(i);
+                } },
               d
             );
           })
         ),
-        this.state.data == [] ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          'h1',
-          null,
-          '"Fetching dongles"'
-        ) : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
+        this.state.data == undefined ? "Fetching dongles" : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
           legend: true,
           data: this.state.data,
-          width: '100%',
+          width: 600,
           height: 400,
           viewBoxObject: {
             x: 0,
@@ -27149,7 +27183,7 @@ var App = function (_React$Component) {
           title: 'Line Chart',
           yAxisLabel: 'Altitude',
           xAxisLabel: 'Elapsed Time (sec)',
-          domain: { x: [100, 0], y: [0, 1000] },
+          domain: { x: [100, 0], y: [, 1000] },
           gridHorizontal: true
         })
       );

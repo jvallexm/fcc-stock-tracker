@@ -5,8 +5,8 @@ var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
 var alVanUrl = 'K9NOANBYPCG01XOM';
 var url = 'mongodb://yes:yes@ds153412.mlab.com:53412/stocks';
-var getUrlFront='https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=';
-var getUrlBack='&interval=1min&outputsize=compac&apikey=K9NOANBYPCG01XOM'; 
+var getUrlFront='https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=';
+var getUrlBack='&apikey=K9NOANBYPCG01XOM'; 
 var request = require("request");
 //https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GE&apikey=K9NOANBYPCG01XOM
 //MSFT&interval=15min&time_period=10&series_type=close&apikey=demo
@@ -26,6 +26,30 @@ io.on('connection', (socket) => {
   setInterval(()=>{
     socket.emit("hot poppers", {"words" : new Date().getTime()});
   },1000);
+  
+  socket.on("remove stocks",(data)=>{
+      console.log("someone needs updated stocks!");
+      //send new stocks to other clients as props
+      console.log(data.stocks);
+      console.log(data.remove);
+      socket.broadcast.emit("all new stocks", data);
+      //edit database to change it to the new props
+      MongoClient.connect(url,function(err,db){
+            if(err)
+            { 
+              console.log(err);
+            }
+            var characters = db.collection('stocks');
+            var findOne = (db,err) => {
+              if(err)
+               console.log(err);
+              console.log("updating database"); 
+              characters.update({name: "stocks"},{stocks: data.stocks}); 
+            }
+            findOne(db,()=>{db.close();});
+      });
+      
+  })
   
   socket.on("needs stocks",()=>{
             console.log("hey! Someone needs stocks!");
