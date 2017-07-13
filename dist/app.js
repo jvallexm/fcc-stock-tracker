@@ -27049,14 +27049,23 @@ var App = function (_React$Component) {
 
     _this.state = {
       title: "",
-      stocks: { stocks: ["getting data from server.."] },
-      data: undefined
+      stocks: { stocks: [] },
+      data: undefined,
+      message: "",
+      search: ""
     };
     _this.removeOne = _this.removeOne.bind(_this);
+    _this.addOne = _this.addOne.bind(_this);
+    _this.handleChange = _this.handleChange.bind(_this);
     return _this;
   }
 
   _createClass(App, [{
+    key: 'handleChange',
+    value: function handleChange(e) {
+      this.setState({ search: e.target.value });
+    }
+  }, {
     key: 'removeOne',
     value: function removeOne(num) {
       var newStocks = [];
@@ -27074,24 +27083,31 @@ var App = function (_React$Component) {
         stocks: newStocks,
         remove: this.state.stocks.stocks[num]
       });
-      this.setState({ stocks: { stocks: newStocks }, data: newData });
+      this.setState({ stocks: { stocks: newStocks }, data: newData, message: "" });
+    }
+  }, {
+    key: 'addOne',
+    value: function addOne(symbol) {
+      //console.log(this.state.stocks.stocks);
+      console.log(this.state.stocks.stocks.indexOf(symbol.toUpperCase()));
+      if (this.state.stocks.stocks.indexOf(symbol.toUpperCase()) > -1) this.setState({ message: "Looks like " + symbol.toUpperCase() + " is already in here!" });else {
+        this.props.socket.emit("get new stock", { symbol: symbol });
+        this.setState({ search: "", message: "" });
+      }
     }
   }, {
     key: 'componentWillMount',
     value: function componentWillMount() {
       var _this2 = this;
 
-      var title = "";
-      this.props.socket.on('hot poppers', function (data) {
-        // console.log(data.words);
-        title = data.words;
-        _this2.setState({ title: title });
-      });
       if (this.state.data == undefined) this.props.socket.emit("needs stocks", { needs: "stocks" });
       this.props.socket.on("get stocks", function (data) {
         console.log(data);
         console.log("stock symbols get");
         _this2.setState({ stocks: data });
+      });
+      this.props.socket.on("message", function (data) {
+        _this2.setState({ message: data.message });
       });
       this.props.socket.on("all new stocks", function (data) {
         console.log("trying to get new stock data");
@@ -27103,6 +27119,29 @@ var App = function (_React$Component) {
           if (_this2.state.data[i].name != data.remove) newData.push(_this2.state.data[i]);
         }
         _this2.setState({ data: newData, stocks: { stocks: data.stocks } });
+      });
+      this.props.socket.on("push data", function (data) {
+        var toObj = JSON.parse(data.data);
+        var dataObj = {
+          name: data.symbol,
+          values: []
+        };
+        var theKeys = Object.keys(toObj["Weekly Time Series"]);
+        console.log("keys length: " + theKeys.length);
+        //console.log(toObj["Time Series (1min)"][theKeys[0]]["1. open"]);
+        for (var j = 0; j < 100; j++) {
+
+          var floaty = parseFloat(toObj["Weekly Time Series"][theKeys[j]]["4. close"]);
+          dataObj.values.push({
+
+            x: j,
+            y: floaty
+
+          });
+        }
+        _this2.state.data.push(dataObj);
+        _this2.state.stocks.stocks.push(data.symbol);
+        _this2.setState({ message: "Got " + data.symbol + " from server!" });
       });
       this.props.socket.on("get stock data", function (data) {
         //https://yang-wei.github.io/rd3/docs/new/charts/lineChart.html
@@ -27147,14 +27186,26 @@ var App = function (_React$Component) {
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'h1',
           null,
-          'Hot poppers'
+          'Aww Yeah Stock Tracker!'
         ),
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-          'h1',
+          'h3',
           null,
-          this.state.title
+          this.state.message
         ),
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('div', null),
+        this.state.data != undefined ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'div',
+          null,
+          'Add a new stock:',
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { value: this.state.search, onChange: this.handleChange }),
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'button',
+            { className: 'btn well', onClick: function onClick() {
+                return _this3.addOne(_this3.state.search);
+              } },
+            ' Submit '
+          )
+        ) : "",
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'div',
           null,
@@ -27169,7 +27220,7 @@ var App = function (_React$Component) {
             );
           })
         ),
-        this.state.data == undefined ? "Fetching dongles" : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
+        this.state.data == undefined ? "Getting Data (There's a lot of it)" : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
           legend: true,
           data: this.state.data,
           width: 600,

@@ -23,10 +23,6 @@ io.on('connection', (socket) => {
   
   console.log('someone connected!');
   
-  setInterval(()=>{
-    socket.emit("hot poppers", {"words" : new Date().getTime()});
-  },1000);
-  
   socket.on("remove stocks",(data)=>{
       console.log("someone needs updated stocks!");
       //send new stocks to other clients as props
@@ -49,7 +45,27 @@ io.on('connection', (socket) => {
             findOne(db,()=>{db.close();});
       });
       
-  })
+  });
+  
+  socket.on("get new stock", (data)=>{
+       var callback = ()=> {
+         //io.sockets.emit();
+       }
+       request(getUrlFront + data.symbol + getUrlBack, (err,res,body)=>{
+          console.log(data.symbol);
+          if(err)
+            console.log(err);
+          var thisObj = JSON.parse(body);
+          socket.emit({"message" : {message: "getting data..."}});
+          if(thisObj.hasOwnProperty("Error Message"))
+            socket.emit("message",{message: "Sorry " + data.symbol + " not found."});
+          else  
+          {
+            io.sockets.emit("push data", {symbol: data.symbol.toUpperCase(), data: body});
+          }  
+       })
+
+  });
   
   socket.on("needs stocks",()=>{
             console.log("hey! Someone needs stocks!");

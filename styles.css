@@ -95,3 +95,7 @@ input
 {
   min-width: 100px;
 }
+input
+{
+  max-width: 300px;
+}
