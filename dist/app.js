@@ -27052,7 +27052,8 @@ var App = function (_React$Component) {
       stocks: { stocks: [] },
       data: undefined,
       message: "",
-      search: ""
+      search: "",
+      loading: 0
     };
     _this.removeOne = _this.removeOne.bind(_this);
     _this.addOne = _this.addOne.bind(_this);
@@ -27092,7 +27093,7 @@ var App = function (_React$Component) {
       console.log(this.state.stocks.stocks.indexOf(symbol.toUpperCase()));
       if (this.state.stocks.stocks.indexOf(symbol.toUpperCase()) > -1) this.setState({ message: "Looks like " + symbol.toUpperCase() + " is already in here!" });else {
         this.props.socket.emit("get new stock", { symbol: symbol });
-        this.setState({ search: "", message: "" });
+        this.setState({ search: "", message: "Searching..." });
       }
     }
   }, {
@@ -27105,6 +27106,9 @@ var App = function (_React$Component) {
         console.log(data);
         console.log("stock symbols get");
         _this2.setState({ stocks: data });
+      });
+      this.props.socket.on("loaded", function (data) {
+        _this2.setState({ loading: _this2.state.loading + 1 });
       });
       this.props.socket.on("message", function (data) {
         _this2.setState({ message: data.message });
@@ -27182,12 +27186,19 @@ var App = function (_React$Component) {
 
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         'div',
-        null,
+        { className: 'text-center container-fluid' },
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'h1',
           null,
           'Aww Yeah Stock Tracker!'
         ),
+        this.state.stocks.stocks.length > 0 && this.state.loading < this.state.stocks.stocks.length ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'h2',
+          null,
+          'Loading: ',
+          Math.floor(this.state.loading / this.state.stocks.stocks.length * 10000) / 100,
+          '%'
+        ) : "",
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'h3',
           null,
@@ -27206,37 +27217,48 @@ var App = function (_React$Component) {
             ' Submit '
           )
         ) : "",
-        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        this.state.data != undefined ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'div',
           null,
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'h4',
+            null,
+            'Current Stocks (Click to Remove)'
+          ),
           this.state.stocks.stocks.map(function (d, i) {
             return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
               'button',
-              { className: 'btn well btn-primary',
+              { className: 'btn well btn-danger',
                 onClick: function onClick() {
                   return _this3.removeOne(i);
                 } },
-              d
+              d,
+              ' ',
+              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('i', { className: 'fa fa-close' })
             );
           })
-        ),
-        this.state.data == undefined ? "Getting Data (There's a lot of it)" : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
-          legend: true,
-          data: this.state.data,
-          width: 600,
-          height: 400,
-          viewBoxObject: {
-            x: 0,
-            y: 0,
-            width: 500,
-            height: 400
-          },
-          title: 'Line Chart',
-          yAxisLabel: 'Altitude',
-          xAxisLabel: 'Elapsed Time (sec)',
-          domain: { x: [100, 0], y: [, 1000] },
-          gridHorizontal: true
-        })
+        ) : "",
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'div',
+          { className: 'text-center container-fluid' },
+          this.state.data == undefined ? "Getting Data (There's a lot of it)" : __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(LineChart, {
+            legend: true,
+            data: this.state.data,
+            width: 1000,
+            height: 400,
+            viewBoxObject: {
+              x: 0,
+              y: 0,
+              width: 1000,
+              height: 400
+            },
+            title: 'Line Chart',
+            yAxisLabel: 'Price (USD)',
+            xAxisLabel: 'Weeks Ago',
+            domain: { x: [100, 0], y: [, 1000] },
+            gridHorizontal: true
+          })
+        )
       );
     }
   }]);

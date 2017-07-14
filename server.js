@@ -40,9 +40,9 @@ io.on('connection', (socket) => {
               if(err)
                console.log(err);
               console.log("updating database"); 
-              characters.update({name: "stocks"},{stocks: data.stocks}); 
+              characters.update({name: "stocks"},{stocks: data.stocks},()=>{db.close();}); 
             }
-            findOne(db,()=>{db.close();});
+            findOne(db);
       });
       
   });
@@ -62,6 +62,27 @@ io.on('connection', (socket) => {
           else  
           {
             io.sockets.emit("push data", {symbol: data.symbol.toUpperCase(), data: body});
+            console.log("attempting connection to database");
+                  MongoClient.connect(url,function(err,db){
+                        if(err)
+                        { 
+                          console.log(err);
+                        }
+                        var characters = db.collection('stocks');
+                        var findOne = (db,err) => {
+                          if(err)
+                          {  
+                            console.log("error");
+                            console.log(err.toString());
+                          }
+                          else
+                          {
+                            var dataUp = data.symbol.toUpperCase();
+                            characters.update({name: "stocks"},{$push : {stocks: dataUp}},()=>{db.close()});
+                          }  
+                        }
+                        findOne(db);
+                  });
           }  
        })
 
@@ -87,10 +108,10 @@ io.on('connection', (socket) => {
 		            var stockObj = [];        
 		              var callback = ()=>{
 		                  console.log("finished!");
-		                  socket.emit("get stocks", data[0]);    
+		                  
 		                  socket.emit("get stock data", stockObj);
 		              };
-		              
+		              socket.emit("get stocks", data[0]);    
 		              data[0].stocks.forEach((item)=>{
                           request(getUrlFront + item + getUrlBack, (err,res,body)=>{
                              if(err)
@@ -99,6 +120,7 @@ io.on('connection', (socket) => {
                              {
                                stockObj.push(body);     
                                console.log("ding" + stockObj.length);  
+                               socket.emit("loaded",{loaded: 1});
                                if(stockObj.length==data[0].stocks.length)
                                  callback();
                              }

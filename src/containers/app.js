@@ -21,7 +21,8 @@ export default class App extends React.Component
       stocks: {stocks: []},
       data: undefined,
       message: "",
-      search: ""
+      search: "",
+      loading: 0
     }
     this.removeOne = this.removeOne.bind(this);
     this.addOne = this.addOne.bind(this);
@@ -65,7 +66,7 @@ export default class App extends React.Component
     else
     {
       this.props.socket.emit("get new stock", {symbol: symbol});
-      this.setState({search: "", message: ""});
+      this.setState({search: "", message: "Searching..."});
     }  
   }
   componentWillMount()
@@ -76,6 +77,9 @@ export default class App extends React.Component
       console.log(data);
       console.log("stock symbols get");
       this.setState({stocks: data});
+    });
+    this.props.socket.on("loaded",(data)=>{
+      this.setState({loading: this.state.loading+1});
     });
     this.props.socket.on("message", (data)=>{
       this.setState({message: data.message});
@@ -155,8 +159,13 @@ export default class App extends React.Component
   render()
   {
     return(
-      <div>
+      <div className="text-center container-fluid">
       <h1>Aww Yeah Stock Tracker!</h1>
+        { this.state.stocks.stocks.length > 0 && this.state.loading<this.state.stocks.stocks.length 
+          ? <h2>Loading: {Math.floor((this.state.loading/this.state.stocks.stocks.length)*10000)/100}%</h2>
+          : ""
+        }
+    
       <h3>{this.state.message}</h3>
       {this.state.data!=undefined
       ?
@@ -165,32 +174,36 @@ export default class App extends React.Component
         <input value={this.state.search} onChange={this.handleChange} />
         <button className = "btn well" onClick={()=>this.addOne(this.state.search)}> Submit </button>
       </div>: ""}
+      {this.state.data!=undefined
+      ?
       <div>
+        <h4>Current Stocks (Click to Remove)</h4>
         {this.state.stocks.stocks.map((d,i)=>
-             <button className="btn well btn-primary"
-                     onClick={()=>this.removeOne(i)}>{d}</button>
+             <button className="btn well btn-danger"
+                     onClick={()=>this.removeOne(i)}>{d} <i className="fa fa-close"/></button>
         )}
       </div>
+      :""}
+      <div className="text-center container-fluid">
       {this.state.data==undefined ? "Getting Data (There's a lot of it)" :
-      
       <LineChart
         legend={true}
         data={this.state.data}
-        width={600}
+        width={1000}
         height={400}
         viewBoxObject={{
           x: 0,
           y: 0,
-          width: 500,
+          width: 1000,
           height: 400
         }}
         title="Line Chart"
-        yAxisLabel="Altitude"
-        xAxisLabel="Elapsed Time (sec)"
+        yAxisLabel="Price (USD)"
+        xAxisLabel="Weeks Ago"
         domain={{x: [100,0], y: [,1000]}}
         gridHorizontal={true}
       />}
-      
+      </div>
       </div>);
   }
 }
