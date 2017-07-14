@@ -161,7 +161,7 @@ export default class App extends React.Component
     return(
       <div className="text-center container-fluid">
       <h1>Aww Yeah Stock Tracker!</h1>
-        { this.state.stocks.stocks.length > 0 && this.state.loading<this.state.stocks.stocks.length 
+        { this.state.stocks.stocks.length > 0 && this.state.loading<this.state.stocks.stocks.length  && this.state.data == undefined
           ? <h2>Loading: {Math.floor((this.state.loading/this.state.stocks.stocks.length)*10000)/100}%</h2>
           : ""
         }

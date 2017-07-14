@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
               if(err)
                console.log(err);
               console.log("updating database"); 
-              characters.update({name: "stocks"},{stocks: data.stocks},()=>{db.close();}); 
+              characters.update({name: "stocks"},{$pull: {stocks: data.remove}},()=>{db.close();}); 
             }
             findOne(db);
       });

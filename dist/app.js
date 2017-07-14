@@ -27192,7 +27192,7 @@ var App = function (_React$Component) {
           null,
           'Aww Yeah Stock Tracker!'
         ),
-        this.state.stocks.stocks.length > 0 && this.state.loading < this.state.stocks.stocks.length ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        this.state.stocks.stocks.length > 0 && this.state.loading < this.state.stocks.stocks.length && this.state.data == undefined ? __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'h2',
           null,
           'Loading: ',
