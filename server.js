@@ -120,7 +120,7 @@ io.on('connection', (socket) => {
                              else
                              {
                                stockObj.push(body);     
-                               console.log("ding" + stockObj.length);  
+                               console.log("ding " + stockObj.length + " " + item);  
                                socket.emit("loaded",{loaded: 1});
                                if(stockObj.length==data[0].stocks.length)
                                  callback();

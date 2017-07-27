@@ -104,3 +104,15 @@ input
   fill: none;
   stroke-width: 1.5px;
 }
+.maxx
+{
+  max-width: 600px;
+}
+h1
+{
+  margin-top: 40px;
+}
+center
+{
+  margin-top: 20px;
+}
