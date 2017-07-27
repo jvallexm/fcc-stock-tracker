@@ -99,3 +99,8 @@ input
 {
   max-width: 300px;
 }
+.line 
+{
+  fill: none;
+  stroke-width: 1.5px;
+}

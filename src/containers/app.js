@@ -2,13 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import FacebookLogin from 'react-facebook-login';
 import $ from "jquery";
-import rd3 from 'rd3';
-var createReactClass = require('create-react-class');
-var propTypes = require('prop-types')
-//import io from 'socket.io-client';
-//const socket=io();
-
-const LineChart = rd3.LineChart;
+import * as d3 from 'd3';
 
 export default class App extends React.Component
 {
@@ -54,6 +48,7 @@ export default class App extends React.Component
           stocks: newStocks,
           remove: this.state.stocks.stocks[num] 
         }
+        
     );
     this.setState({stocks: {stocks: newStocks},data: newData, message: ""});
   }  
@@ -117,9 +112,10 @@ export default class App extends React.Component
             
             });
         }
-        this.state.data.push(dataObj);
+        var newStateData = this.state.data;
+        newStateData.push(dataObj);
         this.state.stocks.stocks.push(data.symbol);
-        this.setState({message: "Got " + data.symbol + " from server!"});
+        this.setState({message: "Got " + data.symbol + " from server!",data: newStateData});
     })
     this.props.socket.on("get stock data",(data)=>{
       //https://yang-wei.github.io/rd3/docs/new/charts/lineChart.html
@@ -132,9 +128,9 @@ export default class App extends React.Component
           name: toObj["Meta Data"]["2. Symbol"],
           values: []
         };
-        console.log(dataObj.name);
+        //console.log(dataObj.name);
         var theKeys = Object.keys(toObj["Weekly Time Series"]);
-        console.log("keys length: " + theKeys.length);
+        //console.log("keys length: " + theKeys.length);
         //console.log(toObj["Time Series (1min)"][theKeys[0]]["1. open"]);
         for(var j=0;j<100;j++)
         {
@@ -147,6 +143,8 @@ export default class App extends React.Component
             
             });
         }
+        //if(i==0)
+       //  console.log(dataObj);
         //console.log("values length for " + dataObj.name +" :"+ dataObj.values.length);
         dataArr.push(dataObj);
        //console.log(dataObj.name);
@@ -186,24 +184,93 @@ export default class App extends React.Component
       :""}
       <div className="text-center container-fluid">
       {this.state.data==undefined ? "Getting Data (There's a lot of it)" :
-      <LineChart
-        legend={true}
-        data={this.state.data}
-        width={1000}
-        height={400}
-        viewBoxObject={{
-          x: 0,
-          y: 0,
-          width: 1000,
-          height: 400
-        }}
-        title="Line Chart"
-        yAxisLabel="Price (USD)"
-        xAxisLabel="Weeks Ago"
-        domain={{x: [100,0], y: [,1000]}}
-        gridHorizontal={true}
-      />}
+      <LineChart data={this.state.data}/>}
       </div>
       </div>);
   }
+}
+
+//https://github.com/topheman/d3-react-experiments/blob/master/src/components/d3/TransitionMultiLineChart/TransitionMultiLineChart.js
+
+class AllNewLineChart extends React.Component
+{
+  
+}
+
+//below with help from https://medium.com/@Elijah_Meeks/interactive-applications-with-react-d3-f76f7b3ebc71
+class LineChart extends React.Component {
+   constructor(props){
+      super(props)
+      this.state = {data: this.props.data};
+      this.createBarChart = this.createBarChart.bind(this)
+   }
+   componentDidMount() 
+   {
+      this.createBarChart()
+   }
+   componentDidUpdate() 
+   {
+      this.createBarChart()
+   }
+   createBarChart() {
+      const node = this.node
+
+      var someData = this.state.data;
+          
+          //Lots of help from https://codepen.io/celar/pen/qREyMq
+          
+          var svg = d3.select(node),
+              margin = {top: 20, right: 80, bottom: 30, left: 50},
+              width = svg.attr("width") - margin.left - margin.right,
+              height = svg.attr("height") - margin.top - margin.bottom,
+              g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          
+          var x = d3.scaleLinear().range([0, width]),
+              y = d3.scaleLinear().range([height, 0]),
+              z = d3.scaleOrdinal(d3.schemeCategory10);
+          
+          var line = d3.line()
+              .x((d)=>x(d.x))
+              .y((d)=>y(d.y));
+          
+          x.domain([4,0]);
+          
+            y.domain([
+              d3.min(someData, (c)=> d3.min(c.values,(d)=>d.y)),
+              d3.max(someData, (c)=> d3.max(c.values,(d)=>d.y))
+            ]);
+          
+            z.domain(someData.map((c)=>c.name));
+          
+            g.append("g")
+                .attr("class", "axis axis--x")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+          
+            g.append("g")
+                .attr("class", "axis axis--y")
+                .call(d3.axisLeft(y))
+              .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", "0.71em")
+                .attr("fill", "#000")
+                .text("Temperature, ºF");
+          
+            var stock = g.selectAll(".stock")
+              .data(someData)
+              .enter().append("g")
+                .attr("class", "stock");
+          
+            stock.append("path")
+                .attr("class", "line")
+                .attr("d", (d)=> line(d.values))
+                .style("stroke", (d)=> z(d.name));
+
+      
+   }
+render() {
+      return( 
+         <svg ref={node => this.node = node} width={500} height={500}> </svg>);
+      }
 }
